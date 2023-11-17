@@ -3,11 +3,14 @@
 {% block head %}
 {{ bootstrap.load_css() }}
 {{ bootstrap.load_js() }}
+
 {% endblock %}
 
 {% block navbar %}
 {% include "_navbar.html" %}
 {% endblock %}
 
-{% block content %}
-{% endblock %}
+<div class="container text-center">
+    {% block content %}
+    {% endblock %}
+</div>
