@@ -20,9 +20,49 @@ def index():
     return render_template('timer.html')
 
 
-@main_bp.route('/login')
+@main_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+       Handles the login functionality.
+
+       If a user is already logged in, redirects to the home page.
+       If a POST request is received, validates the email and password,
+       logs in the user, and redirects to the home page.
+       If a GET request is received, renders the login page.
+
+       Returns:
+           If successful, redirects to the home page.
+           Otherwise, renders the login page with appropriate flash messages.
+    """
+    if session.get('user'):
+        return redirect('/')
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        if not email or not password:
+            flash('Email and password are required', category='danger')
+            return render_template('login.html')
+
+        user = User.query.filter_by(_email=email).first()
+
+        if not user:
+            flash('Invalid email', category='danger')
+            return render_template('login.html')
+        if not user.check_password(password):
+            flash('Invalid password', category='danger')
+            return render_template('login.html')
+        session['user'] = user.get_id()
+        session['login'] = True
+        return redirect('/')
+
     return render_template('login.html')
+
+
+@main_bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/login')
 
 
 @main_bp.route('/register', methods=['GET', 'POST'])

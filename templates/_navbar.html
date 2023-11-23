@@ -4,9 +4,13 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="d-flex flex-row-reverse">
-          <a class="btn btn-light" href="/login" role="button">Login </a>
+      {% if session.login %}
           <a class="btn btn-light" href="/logout" role="button">Logout </a>
+      {% else %}
+          <a class="btn btn-light" href="/login" role="button">Login </a>
           <a class="btn btn-light" href="/register" role="button">Register </a>
+      {% endif %}
+
     </div>
     <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel" data-bs-scroll="true" data-bs-backdrop="false">
       <div class="offcanvas-header">

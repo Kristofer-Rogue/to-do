@@ -36,7 +36,7 @@ class User(db.Model):
         """
         self._password_hash = generate_password_hash(password)
 
-    def _check_password(self, password: str) -> bool:
+    def check_password(self, password: str) -> bool:
         """Checks if the provided password matches the stored password hash.
 
         Args:
@@ -45,7 +45,7 @@ class User(db.Model):
         Returns:
             bool: True if the password matches the stored password hash, False otherwise.
         """
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self._password_hash, password)
 
     def get_id(self) -> int:
         """
