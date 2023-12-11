@@ -1,22 +1,29 @@
-from flask import render_template, Blueprint, session, redirect, request, flash
+from flask import render_template, Blueprint, redirect, request, flash
+from flask_login import login_user, logout_user, login_required
+
 from user import User
-from database import db
 
 main_bp = Blueprint('main', __name__)
 
 
 @main_bp.route('/projects')
+@login_required
 def projects():
+    # TODO: make projects
     return render_template('projects.html', projects=projects)
 
 
 @main_bp.route('/project/<int:project_id>')
+@login_required
 def project(project_id):
+    # TODO: make project
     return render_template('project.html')
 
 
 @main_bp.route('/')
+@login_required
 def index():
+    # TODO: make index
     return render_template('timer.html')
 
 
@@ -34,11 +41,10 @@ def login():
            If successful, redirects to the home page.
            Otherwise, renders the login page with appropriate flash messages.
     """
-    if session.get('user'):
-        return redirect('/')
+
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form.get('email')
+        password = request.form.get('password')
 
         if not email or not password:
             flash('Email and password are required', category='danger')
@@ -52,27 +58,55 @@ def login():
         if not user.check_password(password):
             flash('Invalid password', category='danger')
             return render_template('login.html')
-        session['user'] = user.get_id()
-        session['login'] = True
+
+        login_user(user, remember=True)
         return redirect('/')
 
     return render_template('login.html')
 
 
 @main_bp.route('/logout')
+@login_required
 def logout():
-    session.clear()
+    """
+    Logs out the current user and redirects them to the login page.
+
+    Returns:
+    A redirect response to the login page.
+    """
+
+    logout_user()
     return redirect('/login')
 
 
 @main_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    if session.get('user'):
-        return redirect('/')
+    """
+    Register a new user.
+
+    This function handles the registration process for new users. It accepts both
+    GET and POST requests. If the request method is POST, it validates the email,
+    password, and confirm password fields. If any of the fields are empty, it
+    displays an error message and renders the register.html template. If the email
+    already exists in the database, it displays an error message and renders the
+    register.html template. If the password and confirm password do not match, it
+    displays an error message and renders the register.html template.
+
+    If all the validations pass, it creates a new User object with the provided
+    email and password. It then logs in the user and redirects them to the home
+    page.
+
+    Returns:
+        If the request method is POST and any of the validations fail, it returns
+        the rendered register.html template with the appropriate error message.
+        If the request method is GET or all the validations pass, it returns the
+        rendered register.html template.
+    """
+
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        confirm_password = request.form['confirmPassword']
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirmPassword')
 
         if not email or not password:
             flash('Email and password are required', category='danger')
@@ -85,7 +119,27 @@ def register():
             return render_template('register.html')
 
         user = User(email, password)
-        session['user'] = user.get_id()
-        session['login'] = True
+
+        login_user(user, remember=True)
+
         return redirect('/')
     return render_template('register.html')
+
+
+@main_bp.after_request
+def redirect_to_login(response):
+    """
+    Redirects the user to the login page if the response has a status code of 401.
+
+    Parameters:
+    - response: The HTTP response object.
+
+    Returns:
+    - If the response has a status code of 401, redirects the user to the login page.
+    - Otherwise, returns the original response object.
+    """
+
+    if response.status_code == 401:
+        return redirect('/login')
+
+    return response

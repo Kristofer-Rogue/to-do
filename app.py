@@ -7,7 +7,7 @@ from os import urandom
 
 def create_app() -> Flask:
     """
-    Create and configure the Flask applicat ion.
+    Create and configure the Flask application.
 
     Returns:
         Flask: The configured Flask application.
