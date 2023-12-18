@@ -1,6 +1,7 @@
 from flask import render_template, Blueprint, redirect, request, flash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
+from project import Project
 from user import User
 
 main_bp = Blueprint('main', __name__)
@@ -8,15 +9,17 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/projects')
 @login_required
-def projects():
+def get_projects():
     # TODO: make projects
+    projects = Project.query.filter_by(_user_id=current_user.get_id()).all()
     return render_template('projects.html', projects=projects)
 
 
 @main_bp.route('/project/<int:project_id>')
 @login_required
-def project(project_id):
+def get_project(project_id):
     # TODO: make project
+    project = Project('test', current_user.get_id())
     return render_template('project.html')
 
 
