@@ -19,7 +19,10 @@ def get_projects():
 @login_required
 def get_project(project_id):
     # TODO: make project
-    project = Project('test', current_user.get_id())
+    project = Project.query.filter_by(_id=project_id, _user_id=current_user.get_id()).first()
+    if not project:
+        flash('Project not found', category='danger')
+        return redirect('/projects')
     return render_template('project.html')
 
 
@@ -44,6 +47,8 @@ def login():
            If successful, redirects to the home page.
            Otherwise, renders the login page with appropriate flash messages.
     """
+    if current_user.is_authenticated:
+        return redirect('/')
 
     if request.method == 'POST':
         email = request.form.get('email')
